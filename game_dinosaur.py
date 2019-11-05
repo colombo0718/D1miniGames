@@ -15,7 +15,7 @@ rst = Pin(0, Pin.OUT)
 # check your port docs to see which Pins you can use
 spi = SPI(1, baudrate=8000000, polarity=1, phase=0)
 # TFT object, this is ST7735R green tab version
-tft = TFT_GREEN(128, 160, spi, dc, cs, rst, rotate=0)
+tft = TFT_GREEN(128, 160, spi, dc, cs, rst, rotate=90)
 tft.init()
 
 # low level random generator -------------- 
@@ -61,84 +61,57 @@ def getKey(adc):
     return key
 
 # plot game object functions
-def plotRedCar(x0,x1):
-    if x0!=x1:
-        tft.rect(x0,140,10,20,tft.rgbcolor(0,0,0))
-    tft.rect(x1,140,10,20,tft.rgbcolor(255,0,0))
-
-
-def plotBlueCar(x,y):
-    tft.rect(x,y-5,10,5,tft.rgbcolor(0,0,0))
-    tft.rect(x,y,10,20,tft.rgbcolor(0,0,255))
-
-# game parameter initialize
-end=False
-x0=50;x1=50
-bx=10;by=0
-
-tft.clear(tft.rgbcolor(0, 0, 0))
-
-dinosaur= [
- (0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0),
- (0,0,0,0,0,0,0,0,0,0,1,1,0,1,1,1,1,1,1,1),
- (0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1),
- (0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1),
- (0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1),
- (0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0),
- (0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0),
- (0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0),
- (1,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0),
- (1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0),
- (1,1,0,0,0,0,1,1,1,1,1,1,1,1,0,1,0,0,0,0),
- (1,1,1,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0),
- (1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0),
- (0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0),
- (0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0),
- (0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0),
- (0,0,0,0,1,1,1,1,0,1,1,0,0,0,0,0,0,0,0,0),
- (0,0,0,0,0,1,1,0,0,0,1,0,0,0,0,0,0,0,0,0),
- (0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0),
- (0,0,0,0,0,1,1,0,0,0,1,1,0,0,0,0,0,0,0,0)
- ]
-
-def plotdinosaur(x,y):
-    for i in range(20):
-        for j in range(20):
-            color=tft.rgbcolor(0,0,0)
-            if dinosaur[i][j]==1:
-                color=tft.rgbcolor(255,0,0)
-            tft.pixel(x+j, y+i,color)
-
-for y in range(100):    
-    plotdinosaur(30,y)
-    time.sleep(.1)
-    tft.rect(30,y,20,20,tft.rgbcolor(0, 0, 0))
+def plotRedDinosaur(y0,y1):
+    tft.rect(30,y0,10,20,tft.rgbcolor(0,0,0))
+    tft.rect(30,y1,10,20,tft.rgbcolor(255,0,0))
     
-'''
+def plotGreenCactus(x0,x1):
+    tft.rect(x0,108,10,20,tft.rgbcolor(0,0,0))
+    tft.rect(x1,108,10,20,tft.rgbcolor(0,255,0))
+    
+    
+# game parameter initialize
+tft.clear(tft.rgbcolor(0, 0, 0))
+#tft.line(0,100,160,100,tft.rgbcolor(255,255,255))
+end=False
+jump=False   
+
+x0=160;x1=160
+y0=108; y1=108
+v=0
 while True:
     key=getKey(adc.read())
     # normal condition    
     if end == False:
-        if key=="l" and x1>0  :x1-=10
-        if key=="r" and x1<120 :x1+=10
-        plotRedCar(x0,x1)
-        x0=x1
-        if by==165 :by=-20;bx=randint(0,11)*10;
-        plotBlueCar(bx,by)
-        by+=5
+        # Cactus forward
+        if(x0==-10):
+            x0=160
+        x1=x0-5 
+        # dinosaur jumping
+        if(jump):
+            y1=y0+v 
+            v+=1
+        # fall on ground    
+        if(y0>128):
+            v=0
+            y1=108
+            y0=108
+            jump=False
+        # press to jump
+        if key=='m':
+            v=-8
+            jump=True
+        plotRedDinosaur(y0,y1)
+        plotGreenCactus(x0,x1)
     # collision happened
-    if x1==bx and abs(by-140)<20 :
-        tft.text(0,10,"Good Game", font.terminalfont,tft.rgbcolor(0,255,0), 2)
-        tft.text(0,30,"please press 'RST' ", font.terminalfont,tft.rgbcolor(0,255,0), 1)
-        tft.text(0,40,"to restart game.", font.terminalfont,tft.rgbcolor(0,255,0), 1)
-        end=True
+    if x1==25 or x1==30 or x1==35 :
+        if y1>88:
+            end=True
     # restart game button   
-        if key=="t" :
-            tft.clear(tft.rgbcolor(0, 0, 0))
-            by=-20;
-            bx=randint(0,11)*10;
-            end=False;
+    if key=='m':
+        end=False
     # necessary time delay    
-    time.sleep(.1)
-'''   
-
+    time.sleep(.02)
+    x0=x1
+    y0=y1
+    
