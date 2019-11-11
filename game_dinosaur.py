@@ -41,34 +41,38 @@ def randint(start, stop):
 # from adc value to keyname --------------
 adc = ADC(0)
 def getKey(adc):
+    err=20
     key='n'
     if adc<30 :
         key='n'
-    elif abs(adc-1024)<5:
+    elif abs(adc-1024)<err:
         key='u'
-    elif abs(adc-941)<5:
+    elif abs(adc-941)<err:
         key='d'
-    elif abs(adc-786)<5:
+    elif abs(adc-786)<err:
         key='l'
-    elif abs(adc-631)<5:
+    elif abs(adc-631)<err:
         key='r'
-    elif abs(adc-478)<5:
+    elif abs(adc-478)<err:
         key='m'
-    elif abs(adc-324)<5:
+    elif abs(adc-324)<err:
         key='s'
-    elif abs(adc-170)<5:
+    elif abs(adc-170)<err:
         key='t'     
     return key
 
 # plot game object functions
 def plotRedDinosaur(y0,y1):
-    tft.rect(30,y0,10,20,tft.rgbcolor(0,0,0))
-    tft.rect(30,y1,10,20,tft.rgbcolor(255,0,0))
+    #tft.rect(30,y0,10,20,tft.rgbcolor(0,0,0))
+    #tft.rect(30,y1,10,20,tft.rgbcolor(255,0,0))
+    tft.text(30,y0,"?",font.terminalfont,tft.rgbcolor(0,0,0),2)
+    tft.text(30,y1,"?",font.terminalfont,tft.rgbcolor(255,0,0),2)
     
 def plotGreenCactus(x0,x1):
-    tft.rect(x0,108,10,20,tft.rgbcolor(0,0,0))
-    tft.rect(x1,108,10,20,tft.rgbcolor(0,255,0))
-    
+    #tft.rect(x0,108,10,20,tft.rgbcolor(0,0,0))
+    #tft.rect(x1,108,10,20,tft.rgbcolor(0,255,0))
+    tft.text(x0,108,">",font.terminalfont,tft.rgbcolor(0,0,0),2)
+    tft.text(x1,108,">",font.terminalfont,tft.rgbcolor(0,255,0),2)
     
 # game parameter initialize
 tft.clear(tft.rgbcolor(0, 0, 0))
@@ -84,7 +88,7 @@ while True:
     # normal condition    
     if end == False:
         # Cactus forward
-        if(x0==-10):
+        if(x0==-20):
             x0=160
         x1=x0-5 
         # dinosaur jumping
