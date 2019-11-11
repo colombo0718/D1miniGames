@@ -73,18 +73,21 @@ def plotBlueCar(x,y):
     tft.rect(x,y,10,20,tft.rgbcolor(0,0,255))
     
 def plotRedApple(x,y,color):
-    tft.text(x,y,"b",font.terminalfont,color,1)
+    tft.text(x,y,"@",font.terminalfont,color,1)
     #tft.text(0,30,"please press 'RST' ", font.terminalfont,tft.rgbcolor(0,255,0), 1)
     
 
 # game parameter initialize
-end=False
+end=False;score=0
+
 # apple position
-ax=100;ay0=50;ay1=50
+ax=100;ay0=0;ay1=0
 # basket position 
 bx0=50;bx1=50;by=140
 
 tft.clear(tft.rgbcolor(0, 0, 0))
+plotGreenBasket(bx1,140,tft.rgbcolor(0,255,0))
+tft.text(110,0,str(score), font.terminalfont,tft.rgbcolor(255,255,255), 1)
 while True:
     key=getKey(adc.read())
     # normal condition    
@@ -105,19 +108,18 @@ while True:
         if ay1>165: ay0=-10;ax=randint(0,11)*10;
         print(ax,ay1,bx1,by)
     # collision happened
-    '''
+    
     if ay1>140 and ay1<150 and ax-bx1<20 and ax-bx1>-5 :
-        tft.text(0,10,"Good Game", font.terminalfont,tft.rgbcolor(0,255,0), 2)
-        tft.text(0,30,"please press 'RST' ", font.terminalfont,tft.rgbcolor(0,255,0), 1)
-        tft.text(0,40,"to restart game.", font.terminalfont,tft.rgbcolor(0,255,0), 1)
-        end=True
+        tft.text(110,0,str(score), font.terminalfont,tft.rgbcolor(0,0,0), 1)
+        score+=1
+        tft.text(110,0,str(score), font.terminalfont,tft.rgbcolor(255,255,255), 1)
     # restart game button   
         if key=="t" :
             tft.clear(tft.rgbcolor(0, 0, 0))
             by=-20;
             bx=randint(0,11)*10;
             end=False;
-    '''
+    
     # necessary time delay    
     time.sleep(.05)
     
