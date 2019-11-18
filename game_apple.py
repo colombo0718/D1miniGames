@@ -44,19 +44,19 @@ def getKey(adc):
     key='n'
     if adc<30 :
         key='n'
-    elif abs(adc-1024)<5:
+    elif abs(adc-1024)<30:
         key='u'
-    elif abs(adc-941)<5:
+    elif abs(adc-941)<30:
         key='d'
-    elif abs(adc-786)<5:
+    elif abs(adc-786)<30:
         key='l'
-    elif abs(adc-631)<5:
+    elif abs(adc-631)<30:
         key='r'
-    elif abs(adc-478)<5:
+    elif abs(adc-478)<30:
         key='m'
-    elif abs(adc-324)<5:
+    elif abs(adc-324)<30:
         key='s'
-    elif abs(adc-170)<5:
+    elif abs(adc-170)<30:
         key='t'     
     return key
 
@@ -90,6 +90,7 @@ plotGreenBasket(bx1,140,tft.rgbcolor(0,255,0))
 tft.text(110,0,str(score), font.terminalfont,tft.rgbcolor(255,255,255), 1)
 while True:
     key=getKey(adc.read())
+    print(adc.read())
     # normal condition    
     if end == False:
         # get control 
@@ -106,7 +107,7 @@ while True:
         plotRedApple(ax,ay1,tft.rgbcolor(255,0,0))
         ay0=ay1
         if ay1>165: ay0=-10;ax=randint(0,11)*10;
-        print(ax,ay1,bx1,by)
+        #print(ax,ay1,bx1,by)
     # collision happened
     
     if ay1>140 and ay1<150 and ax-bx1<20 and ax-bx1>-5 :
