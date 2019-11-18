@@ -65,14 +65,20 @@ def getKey(adc):
 def plotRedDinosaur(y0,y1):
     #tft.rect(30,y0,10,20,tft.rgbcolor(0,0,0))
     #tft.rect(30,y1,10,20,tft.rgbcolor(255,0,0))
-    tft.text(30,y0,"?",font.terminalfont,tft.rgbcolor(0,0,0),2)
-    tft.text(30,y1,"?",font.terminalfont,tft.rgbcolor(255,0,0),2)
+    #tft.text(30,y0,"?",font.terminalfont,tft.rgbcolor(0,0,0),1)
+    #tft.text(30,y1,"?",font.terminalfont,tft.rgbcolor(255,0,0),1)
+    
+    #tft.char_b(30, y0, "A", font.terminalfont, tft.rgbcolor(0,0,0))
+    tft.char_b(30, y1, "?", font.terminalfont, tft.rgbcolor(255,0,0))
     
 def plotGreenCactus(x0,x1):
     #tft.rect(x0,108,10,20,tft.rgbcolor(0,0,0))
     #tft.rect(x1,108,10,20,tft.rgbcolor(0,255,0))
-    tft.text(x0,108,">",font.terminalfont,tft.rgbcolor(0,0,0),2)
-    tft.text(x1,108,">",font.terminalfont,tft.rgbcolor(0,255,0),2)
+    #tft.text(x0,108,">",font.terminalfont,tft.rgbcolor(0,0,0),1)
+    #tft.text(x1,108,">",font.terminalfont,tft.rgbcolor(0,255,0),1)
+    
+    #tft.char_b(x0, 108, ">", font.terminalfont, tft.rgbcolor(0,0,0))
+    tft.char_b(x1, 108, ">", font.terminalfont, tft.rgbcolor(0,255,0))
     
 # game parameter initialize
 tft.clear(tft.rgbcolor(0, 0, 0))
@@ -80,9 +86,13 @@ tft.clear(tft.rgbcolor(0, 0, 0))
 end=False
 jump=False   
 
-x0=160;x1=160
+x0=140;x1=140
 y0=108; y1=108
 v=0
+
+plotRedDinosaur(y0,y1)
+plotGreenCactus(x0,x1)
+'''
 while True:
     key=getKey(adc.read())
     # normal condition    
@@ -115,7 +125,7 @@ while True:
     if key=='m':
         end=False
     # necessary time delay    
-    time.sleep(.02)
+    time.sleep(.05)
     x0=x1
     y0=y1
-    
+'''   

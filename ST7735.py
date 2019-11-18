@@ -251,7 +251,7 @@ class ST7735(object):
         px = x
         for c in string:
             # from huang
-            self.char(px, y, c, font, color, size, size)
+            self.char_b(px, y, c, font, color, size, size)
             px += width
 
             # wrap the text to the next line if it reaches the end
@@ -279,22 +279,7 @@ class ST7735(object):
 
             ch = font['data'][ci:ci + width]
 
-            # no font scaling
-            # from huang
-            # -----------------------------
-#            px = x
-#            if (sizex <= 1 and sizey <= 1):
-#                self._set_window(x, y, x + width - 1, y + height - 1)
-#                self.dc.value(1)
-#                self.cs.value(0)
-#                for i in range(height):
-#                    for c in ch:
-#                        if (c >> i) & 0x01:
-#                            self.spi.write(bytearray([color >> 8, color]))
-#                        else:
-#                            self.spi.write(bytearray([0, 0]))
-#                self.cs.value(1)
-            # -----------------------------               
+            # no font scaling               
             px = x
             if (sizex <= 1 and sizey <= 1):
                 for c in ch:
@@ -320,66 +305,7 @@ class ST7735(object):
             # character not found in this font
             return
         
-    def char_b(self, x, y, char, font, color, sizex=1, sizey=1):
-        """
-        Draw a character at a given position using the user font.
-
-        Font is a data dictionary, can be scaled with sizex and sizey.
-        """
-        if font is None:
-            return
-
-        startchar = font['start']
-        endchar = font['end']
-        ci = ord(char)
-
-        if (startchar <= ci <= endchar):
-            width = font['width']
-            height = font['height']
-            ci = (ci - startchar) * width
-
-            ch = font['data'][ci:ci + width]
-
-            # no font scaling
-            # from huang
-            # -----------------------------
-            px = x
-            if (sizex <= 1 and sizey <= 1):
-                self._set_window(x, y, x + width - 1, y + height - 1)
-                self.dc.value(1)
-                self.cs.value(0)
-                for i in range(height):
-                    for c in ch:
-                        if (c >> i) & 0x01:
-                            self.spi.write(bytearray([color >> 8, color]))
-                        else:
-                            self.spi.write(bytearray([0, 0]))
-                self.cs.value(1)
-            # -----------------------------               
-#            px = x
-#            if (sizex <= 1 and sizey <= 1):
-#                for c in ch:
-#                    py = y
-#                    for _ in range(height):
-#                        if c & 0x01:
-#                            self.pixel(px, py, color)
-#                        py += 1
-#                        c >>= 1
-#                    px += 1
-            # -----------------------------
-            # scale to given sizes
-            else:
-                for c in ch:
-                    py = y
-                    for _ in range(height):
-                        if c & 0x01:
-                            self.rect(px, py, sizex, sizey, color)
-                        py += sizey
-                        c >>= 1
-                    px += sizex
-        else:
-            # character not found in this font
-            return
+    
         
     def init(self):
         """
