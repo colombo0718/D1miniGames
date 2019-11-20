@@ -63,22 +63,17 @@ def getKey(adc):
 # plot game object functions
 def plotRedCar(x0,x1):
     if x0!=x1 :
-        tft.rect(x0,140,10,20,tft.rgbcolor(0,0,0))
-        #tft.char_b(x0,140,"=", font.terminalfont, tft.rgbcolor(0,0,0))
-    tft.rect(x1,140,10,20,tft.rgbcolor(255,0,0))
-    #tft.char_b(x1,140,"=", font.terminalfont, tft.rgbcolor(255,0,0))
+        tft.rect(x0,140,5,10,tft.rgbcolor(0,0,0))
+    tft.rect(x1,140,5,10,tft.rgbcolor(255,0,0))
 
 def plotGreenMissile(x,y):
     tft.rect(x,y+10,5,10,tft.rgbcolor(0,0,0))
-    tft.rect(x,y,5,10,tft.rgbcolor(0,255,0))
+    tft.rect(x,y,1,5,tft.rgbcolor(255,0,255))
     #tft.char_b(x1, 108, ">", font.terminalfont, tft.rgbcolor(0,255,0))
 
 def plotBlueCar(x,y):
-    tft.rect(x,y-3,10,5,tft.rgbcolor(0,0,0))
-    #tft.char_b(x,y-3,"=", font.terminalfont, tft.rgbcolor(0,0,0))
-    tft.rect(x,y,10,20,tft.rgbcolor(0,0,255))
-    #tft.char_b(x,y,"=", font.terminalfont, tft.rgbcolor(0,0,255))
-    #tft.char_b(x,y,">", font.terminalfont, tft.rgbcolor(0,255,0))
+    tft.rect(x,y-3,5,3,tft.rgbcolor(0,0,0))
+    tft.rect(x,y,5,10,tft.rgbcolor(0,0,255))
 
 # game parameter initialize
 end=False
@@ -103,19 +98,24 @@ while True:
         #print(bx,by)
         plotBlueCar(bx,by)
         by+=3
+        #print(by)
     # collision happened
-    if x1==bx and abs(by-140)<20 :
+    print(mx>bx-5,mx<bx+10)
+    if my-by<10 and mx>bx-5 and mx<bx+10:
+        by=-20;bx=randint(0,11)*10;
+        mx=0;my=-20
+    if x1>bx-10 and x1<bx+10 and abs(by-140)<20 :
         tft.text(0,10,"Good Game", font.terminalfont,tft.rgbcolor(0,255,0), 2)
         tft.text(0,30,"please press 'RST' ", font.terminalfont,tft.rgbcolor(0,255,0), 1)
         tft.text(0,40,"to restart game.", font.terminalfont,tft.rgbcolor(0,255,0), 1)
         end=True
-    # restart game button   
-        if key=="m" :
+    # restart game button
+        if key=="m":
             tft.clear(tft.rgbcolor(0, 0, 0))
             by=-20;
             bx=randint(0,11)*10;
             end=False;
-    # necessary time delay    
-    time.sleep(.03)
+    # necessary time delay
+    time.sleep(.01)
     
 

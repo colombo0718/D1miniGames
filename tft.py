@@ -105,7 +105,7 @@ class TFT(ST7735):
             height = font['height']
             ci = (ci - startchar) * width
             ch = font['data'][ci:ci + width]
-            print(ci,ch)
+            # print(ci,ch)
             # no font scaling
             # from huang
             # -----------------------------
