@@ -1,6 +1,6 @@
 from machine import Pin, SPI, ADC
 from tft import TFT_GREEN
-import font
+#import font
 import time
 from urandom import *
 
@@ -59,62 +59,74 @@ def getKey(adc):
     elif abs(adc-170)<50:
         key='t'     
     return key
-
+Vb=10
 # plot game object functions
-def plotRedCar(x0,x1):
+def plotBluTank(x0,x1,y):
     if x0!=x1 :
-        tft.rect(x0,140,5,10,tft.rgbcolor(0,0,0))
-    tft.rect(x1,140,5,10,tft.rgbcolor(255,0,0))
+        tft.rect(x0,y-5,10,20,tft.rgbcolor(0,0,0))
+    tft.rect(x1+4,y-5,2,10,tft.rgbcolor(0,0,255))
+    tft.rect(x1,y,10,8,tft.rgbcolor(0,0,255))
 
-def plotGreenMissile(x,y):
-    tft.rect(x,y+10,5,10,tft.rgbcolor(0,0,0))
-    tft.rect(x,y,1,5,tft.rgbcolor(255,0,255))
-    #tft.char_b(x1, 108, ">", font.terminalfont, tft.rgbcolor(0,255,0))
+def plotCyanBullet(x,y):
+    tft.rect(x,y+Vb,2,5,tft.rgbcolor(0,0,0))
+    tft.rect(x,y,2,5,tft.rgbcolor(0,255,255))
 
-def plotBlueCar(x,y):
-    tft.rect(x,y-3,5,3,tft.rgbcolor(0,0,0))
-    tft.rect(x,y,5,10,tft.rgbcolor(0,0,255))
+def plotRedTank(x0,x1,y):
+    if x0!=x1 :
+        tft.rect(x0,y,10,20,tft.rgbcolor(0,0,0))
+    tft.rect(x1+4,y+5,2,10,tft.rgbcolor(255,0,0))
+    tft.rect(x1,y,10,8,tft.rgbcolor(255,0,0))
+    
+def plotMageBullet(x,y):
+    tft.rect(x,y-Vb,2,5,tft.rgbcolor(0,0,0))
+    tft.rect(x,y,2,5,tft.rgbcolor(255,0,255))
+
 
 # game parameter initialize
 end=False
-x0=50;x1=50
-bx=10;by=0
-mx=0;my=-20
+Bx0=60;Bx1=60;By=150
+Cx=60;Cy=-10
+Rx0=60;Rx1=0;Ry=0
+Mx=60;My=170
+dx=3
+
 
 tft.clear(tft.rgbcolor(0, 0, 0))
+tft.rect(115,150,3,6,tft.rgbcolor(255,255,0))
+tft.rect(118,152,2,6,tft.rgbcolor(255,255,0))
+tft.rect(120,150,3,6,tft.rgbcolor(255,255,0))
+
 while True:
     key=getKey(adc.read())
     # normal condition    
     if end == False:
-        if key=="l" and x1>0  :x1-=5
-        elif key=="r" and x1<120 :x1+=5
-        elif key=="m" and my<-10 : mx=x1+2;my=140
-        plotRedCar(x0,x1)
+        if key=="l" and Bx1>0  :Bx1-=3
+        elif key=="r" and Bx1<100 :Bx1+=3
+        # fire Cyan bullet 
+        elif key=="m" and Cy<=-10 : Cx=Bx1+4;Cy=150
+        Cy-=Vb
+        if Cy<=-10 : Cy=-10
+        plotCyanBullet(Cx,Cy)
+        # move My tank 
+        plotBluTank(Bx0,Bx1,By)
+        Bx0=Bx1
+        # fire Mage bullet
+        if My>=170 : Mx=Rx1+4;My=5
+        My+=Vb
+        plotMageBullet(Mx,My)
+        # move Enemy tank
+        Rx1+=dx
+        if Rx1>100 : dx=-3
+        elif Rx1<0 : dx=3
+        plotRedTank(Rx0,Rx1,Ry)
+        Rx0=Rx1
         
-        plotGreenMissile(mx,my)
-        if my>-30 : my-=10
-        x0=x1
-        if by>165 :by=-20;bx=randint(0,11)*10;
-        #print(bx,by)
-        plotBlueCar(bx,by)
-        by+=3
-        #print(by)
-    # collision happened
-    print(mx>bx-5,mx<bx+10)
-    if my-by<10 and mx>bx-5 and mx<bx+10:
-        by=-20;bx=randint(0,11)*10;
-        mx=0;my=-20
-    if x1>bx-10 and x1<bx+10 and abs(by-140)<20 :
-        tft.text(0,10,"Good Game", font.terminalfont,tft.rgbcolor(0,255,0), 2)
-        tft.text(0,30,"please press 'RST' ", font.terminalfont,tft.rgbcolor(0,255,0), 1)
-        tft.text(0,40,"to restart game.", font.terminalfont,tft.rgbcolor(0,255,0), 1)
-        end=True
-    # restart game button
-        if key=="m":
-            tft.clear(tft.rgbcolor(0, 0, 0))
-            by=-20;
-            bx=randint(0,11)*10;
-            end=False;
+        
+
+
+
+
+
     # necessary time delay
     time.sleep(.01)
     
