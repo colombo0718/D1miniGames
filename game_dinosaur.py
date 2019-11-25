@@ -63,22 +63,26 @@ def getKey(adc):
 
 # plot game object functions
 def plotRedDinosaur(y0,y1):
-    #tft.rect(30,y0,10,20,tft.rgbcolor(0,0,0))
-    #tft.rect(30,y1,10,20,tft.rgbcolor(255,0,0))
-    #tft.text(30,y0,"?",font.terminalfont,tft.rgbcolor(0,0,0),1)
-    #tft.text(30,y1,"?",font.terminalfont,tft.rgbcolor(255,0,0),1)
+    tft.rect(30-10,y0,20,20,tft.rgbcolor(0,0,0))
+    tft.rect(30,y1,7,7,tft.rgbcolor(255,0,0))
+    tft.rect(30-3,y1,4,15,tft.rgbcolor(255,0,0))
+    tft.rect(30-9,y1+13,6,2,tft.rgbcolor(255,0,0))
+    tft.rect(30-3,y1+15,2,5,tft.rgbcolor(255,0,0))
+    tft.rect(30,y1+15,2,5,tft.rgbcolor(255,0,0))
+    tft.rect(30,y1+3,2,2,tft.rgbcolor(0,0,0))
+    tft.rect(30,y1+8,5,1,tft.rgbcolor(255,0,0))
+    tft.rect(30,y1+10,3,2,tft.rgbcolor(255,0,0))
+    tft.rect(30+3,y1+10,1,3,tft.rgbcolor(255,0,0))
     
-    #tft.char_b(30, y0, "A", font.terminalfont, tft.rgbcolor(0,0,0))
-    tft.char_b(30, y1, "?", font.terminalfont, tft.rgbcolor(255,0,0))
+
     
 def plotGreenCactus(x0,x1):
-    #tft.rect(x0,108,10,20,tft.rgbcolor(0,0,0))
-    #tft.rect(x1,108,10,20,tft.rgbcolor(0,255,0))
-    #tft.text(x0,108,">",font.terminalfont,tft.rgbcolor(0,0,0),1)
-    #tft.text(x1,108,">",font.terminalfont,tft.rgbcolor(0,255,0),1)
-    
-    #tft.char_b(x0, 108, ">", font.terminalfont, tft.rgbcolor(0,0,0))
-    tft.char_b(x1, 108, ">", font.terminalfont, tft.rgbcolor(0,255,0))
+    tft.rect(x0-6,108,13,20,tft.rgbcolor(0,0,0))
+    tft.rect(x1-1,108,3,20,tft.rgbcolor(0,255,0))
+    tft.rect(x1-6,108+5,2,5,tft.rgbcolor(0,255,0))
+    tft.rect(x1+5,108+3,2,7,tft.rgbcolor(0,255,0))
+    tft.rect(x1-5,108+10,11,2,tft.rgbcolor(0,255,0))
+
     
 # game parameter initialize
 tft.clear(tft.rgbcolor(0, 0, 0))
@@ -92,15 +96,17 @@ v=0
 
 plotRedDinosaur(y0,y1)
 plotGreenCactus(x0,x1)
-'''
+
+
+
 while True:
     key=getKey(adc.read())
     # normal condition    
     if end == False:
         # Cactus forward
-        if(x0==-20):
+        if(x0<-20):
             x0=160
-        x1=x0-5 
+        x1=x0-5
         # dinosaur jumping
         if(jump):
             y1=y0+v 
@@ -112,20 +118,24 @@ while True:
             y0=108
             jump=False
         # press to jump
-        if key=='m':
+        if key=='m' and jump==False:
             v=-8
             jump=True
         plotRedDinosaur(y0,y1)
+        print(x1)
         plotGreenCactus(x0,x1)
     # collision happened
-    if x1==25 or x1==30 or x1==35 :
+    print(abs(x1-30))
+    if abs(x1-30)<10:
         if y1>88:
             end=True
-    # restart game button   
-    if key=='m':
-        end=False
+    # restart game button
+    if end == True:
+        if key=='m':
+            end=False
+            
     # necessary time delay    
-    time.sleep(.05)
+    time.sleep(.001)
     x0=x1
     y0=y1
-'''   
+  
