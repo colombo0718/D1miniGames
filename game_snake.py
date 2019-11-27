@@ -42,21 +42,21 @@ def randint(start, stop):
 adc = ADC(0)
 def getKey(adc):
     key='n'
-    if adc<30 :
+    if adc<80 :
         key='n'
-    elif abs(adc-1024)<50:
+    elif abs(adc-1024)<80:
         key='u'
     elif abs(adc-941)<50:
         key='d'
-    elif abs(adc-786)<50:
+    elif abs(adc-786)<80:
         key='l'
     elif abs(adc-631)<50:
         key='r'
-    elif abs(adc-478)<50:
+    elif abs(adc-478)<80:
         key='m'
-    elif abs(adc-324)<50:
+    elif abs(adc-324)<80:
         key='s'
-    elif abs(adc-170)<50:
+    elif abs(adc-170)<80:
         key='t'     
     return key
 

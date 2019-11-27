@@ -105,6 +105,7 @@ tft.line(112, 0, 112, 160,tft.rgbcolor(255,255,255))
 plotYelloHeart(life)
 
 while True:
+    
     key=getKey(adc.read())
     # normal condition    
     if end == False:
@@ -133,7 +134,7 @@ while True:
         plotMageBullet(Mx,My)
         
         # My tank hited
-        print(Mx>Bx1,Mx<Bx1-10,My)
+        # print(Mx>Bx1,Mx<Bx1-10,My)
         if Mx>Bx1 and Mx<Bx1+10 and My>150 and My<160 :
             Mx=-10;My=170
             time.sleep(.5)
