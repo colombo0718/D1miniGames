@@ -1,6 +1,5 @@
-from machine import Pin, SPI, ADC
+from machine import Pin, SPI, ADC, PWM
 from tft import TFT_GREEN
-import font
 import time
 from urandom import *
 
@@ -15,8 +14,27 @@ rst = Pin(0, Pin.OUT)
 # check your port docs to see which Pins you can use
 spi = SPI(1, baudrate=8000000, polarity=1, phase=0)
 # TFT object, this is ST7735R green tab version
-tft = TFT_GREEN(128, 160, spi, dc, cs, rst, rotate=0)
+tft = TFT_GREEN(128, 160, spi, dc, cs, rst, rotate=180)
 tft.init()
+
+buzzer=PWM(Pin(12,Pin.OUT),duty=500)
+def toot():
+    buzzer.duty(500)
+    buzzer.freq(1000)
+    time.sleep(.01)
+    buzzer.duty(0)
+
+def ding():
+    buzzer.duty(500)
+    buzzer.freq(500)
+    time.sleep(.02)
+    buzzer.freq(1000)
+    time.sleep(.05)
+    buzzer.freq(500)
+    time.sleep(.03)
+    buzzer.duty(0)
+
+toot()
 
 # low level random generator -------------- 
 def randrange(start, stop=None):
@@ -42,62 +60,45 @@ def randint(start, stop):
 adc = ADC(0)
 def getKey(adc):
     key='n'
-    if adc<100 :
+    if adc<80 :
         key='n'
-    elif abs(adc-1024)<100:
+    elif abs(adc-1024)<50:
         key='u'
-    elif abs(adc-941)<100:
+    elif abs(adc-964)<50:
         key='d'
-    elif abs(adc-786)<100:
+    elif abs(adc-730)<80:
         key='l'
-    elif abs(adc-631)<100:
+    elif abs(adc-489)<50:
         key='r'
-    elif abs(adc-478)<100:
-        key='m'
-    elif abs(adc-324)<100:
-        key='s'
-    elif abs(adc-170)<100:
-        key='t'     
+    elif abs(adc-246)<80:
+        key='m'    
     return key
 
 # plot game object functions
 def plotRedCar(x0,x1):
     if x0!=x1 :
         tft.rect(x0,140,10,20,tft.rgbcolor(0,0,0))
-        #tft.char_b(x0,140,"=", font.terminalfont, tft.rgbcolor(0,0,0))
     tft.rect(x1,140,10,20,tft.rgbcolor(255,0,0))
-    #tft.char_b(x1,140,"=", font.terminalfont, tft.rgbcolor(255,0,0))
 
-def plotGreenMissile(x,y):
-    tft.rect(x,y+10,5,10,tft.rgbcolor(0,0,0))
-    tft.rect(x,y,5,10,tft.rgbcolor(0,255,0))
-    #tft.char_b(x1, 108, ">", font.terminalfont, tft.rgbcolor(0,255,0))
 
 def plotBlueCar(x,y):
     tft.rect(x,y-3,10,5,tft.rgbcolor(0,0,0))
-    #tft.char_b(x,y-3,"=", font.terminalfont, tft.rgbcolor(0,0,0))
     tft.rect(x,y,10,20,tft.rgbcolor(0,0,255))
-    #tft.char_b(x,y,"=", font.terminalfont, tft.rgbcolor(0,0,255))
-    #tft.char_b(x,y,">", font.terminalfont, tft.rgbcolor(0,255,0))
 
 # game parameter initialize
 end=False
 x0=50;x1=50
 bx=10;by=0
-mx=0;my=-20
 
 tft.clear(tft.rgbcolor(0, 0, 0))
 while True:
     key=getKey(adc.read())
     # normal condition    
     if end == False:
-        if key=="l" and x1>0  :x1-=5
-        elif key=="r" and x1<120 :x1+=5
-        elif key=="m" and my<-10 : mx=x1+2;my=140
+        if key=="l" and x1>0  :x1-=5;toot()
+        elif key=="r" and x1<120 :x1+=5;toot()
         plotRedCar(x0,x1)
         
-        plotGreenMissile(mx,my)
-        if my>-30 : my-=10
         x0=x1
         if by>165 :by=-20;bx=randint(0,11)*10;
         #print(bx,by)
@@ -105,9 +106,6 @@ while True:
         by+=3
     # collision happened
     if x1==bx and abs(by-140)<20 :
-        tft.text(0,10,"Good Game", font.terminalfont,tft.rgbcolor(0,255,0), 2)
-        tft.text(0,30,"please press 'RST' ", font.terminalfont,tft.rgbcolor(0,255,0), 1)
-        tft.text(0,40,"to restart game.", font.terminalfont,tft.rgbcolor(0,255,0), 1)
         end=True
     # restart game button   
         if key=="m" :

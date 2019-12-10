@@ -1,6 +1,5 @@
-from machine import Pin, SPI, ADC
+from machine import Pin, SPI, ADC, PWM
 from tft import TFT_GREEN
-import font
 import time
 from urandom import *
 
@@ -15,8 +14,27 @@ rst = Pin(0, Pin.OUT)
 # check your port docs to see which Pins you can use
 spi = SPI(1, baudrate=8000000, polarity=1, phase=0)
 # TFT object, this is ST7735R green tab version
-tft = TFT_GREEN(128, 160, spi, dc, cs, rst, rotate=0)
+tft = TFT_GREEN(128, 160, spi, dc, cs, rst, rotate=180)
 tft.init()
+
+buzzer=PWM(Pin(12,Pin.OUT),duty=500)
+def toot():
+    buzzer.duty(500)
+    buzzer.freq(1000)
+    time.sleep(.01)
+    buzzer.duty(0)
+
+def ding():
+    buzzer.duty(500)
+    buzzer.freq(500)
+    time.sleep(.02)
+    buzzer.freq(1000)
+    time.sleep(.05)
+    buzzer.freq(500)
+    time.sleep(.03)
+    buzzer.duty(0)
+
+toot()
 
 # low level random generator -------------- 
 def randrange(start, stop=None):
@@ -42,39 +60,33 @@ def randint(start, stop):
 adc = ADC(0)
 def getKey(adc):
     key='n'
-    if adc<30 :
+    if adc<80 :
         key='n'
-    elif abs(adc-1024)<30:
+    elif abs(adc-1024)<50:
         key='u'
-    elif abs(adc-941)<30:
+    elif abs(adc-964)<50:
         key='d'
-    elif abs(adc-786)<30:
+    elif abs(adc-730)<80:
         key='l'
-    elif abs(adc-631)<30:
+    elif abs(adc-489)<50:
         key='r'
-    elif abs(adc-478)<30:
-        key='m'
-    elif abs(adc-324)<30:
-        key='s'
-    elif abs(adc-170)<30:
-        key='t'     
+    elif abs(adc-246)<80:
+        key='m'    
     return key
 
 # plot game object functions
-def plotRedCar(x0,x1):
-    if x0!=x1:
-        tft.rect(x0,140,10,20,tft.rgbcolor(0,0,0))
-    tft.rect(x1,140,10,20,tft.rgbcolor(255,0,0))
-def plotGreenBasket(x,y,color):
-    tft.text(x,y,"U",font.terminalfont,color,2)
-
-def plotBlueCar(x,y):
-    tft.rect(x,y-5,10,5,tft.rgbcolor(0,0,0))
-    tft.rect(x,y,10,20,tft.rgbcolor(0,0,255))
-    
+def plotGreenBasket(x0,x1):
+    tft.rect(x0-8,150-10,17,20,tft.rgbcolor(0,0,0))
+    tft.rect(x1-5,155,10,3,tft.rgbcolor(0,255,0))
+    tft.rect(x1-8,150,3,5,tft.rgbcolor(0,255,0))
+    tft.rect(x1+6,150,3,5,tft.rgbcolor(0,255,0))
+  
 def plotRedApple(x,y,color):
-    tft.text(x,y,"@",font.terminalfont,color,1)
-    #tft.text(0,30,"please press 'RST' ", font.terminalfont,tft.rgbcolor(0,255,0), 1)
+    tft.rect(x-4,y-8-6,8,12,tft.rgbcolor(0,0,0))
+    tft.rect(x-4,y-3,8,6,tft.rgbcolor(255,0,0))
+    tft.rect(x-3,y-4,6,8,tft.rgbcolor(255,0,0))
+    tft.rect(x,y-7,1,3,tft.rgbcolor(255,0,0))
+    tft.rect(x,y-8,4,1,tft.rgbcolor(255,0,0))
     
 
 # game parameter initialize
@@ -86,34 +98,34 @@ ax=100;ay0=0;ay1=0
 bx0=50;bx1=50;by=140
 
 tft.clear(tft.rgbcolor(0, 0, 0))
-plotGreenBasket(bx1,140,tft.rgbcolor(0,255,0))
-tft.text(110,0,str(score), font.terminalfont,tft.rgbcolor(255,255,255), 1)
+plotGreenBasket(bx0,bx1)
+
 while True:
     key=getKey(adc.read())
-    print(adc.read())
     # normal condition    
     if end == False:
         # get control 
-        if key=="l" and bx1>0   :bx1=bx0-5
-        if key=="r" and bx1<120 :bx1=bx0+5
+        if key=="l" and bx1>10  :bx1=bx0-5;toot()
+        if key=="r" and bx1<120 :bx1=bx0+5;toot()
         # plotBasket
         if bx1!=bx0:
-            plotGreenBasket(bx0,140,tft.rgbcolor(0,0,0))
-            plotGreenBasket(bx1,140,tft.rgbcolor(0,255,0))
+            #plotGreenBasket(bx0,140,tft.rgbcolor(0,0,0))
+            plotGreenBasket(bx0,bx1)
             bx0=bx1
         # plotApple
-        ay1=ay0+6
+        ay1=ay0+3
         plotRedApple(ax,ay0,tft.rgbcolor(0,0,0))
         plotRedApple(ax,ay1,tft.rgbcolor(255,0,0))
         ay0=ay1
-        if ay1>165: ay0=-10;ax=randint(0,11)*10;
+        if ay1>165: ay0=-10;ax=randint(1,11)*10;
         #print(ax,ay1,bx1,by)
     # collision happened
     
-    if ay1>140 and ay1<150 and ax-bx1<20 and ax-bx1>-5 :
-        tft.text(110,0,str(score), font.terminalfont,tft.rgbcolor(0,0,0), 1)
+    if ay1>150 and ax-bx1<20 and ax-bx1>-5 :
+        ding()
+        ding()
         score+=1
-        tft.text(110,0,str(score), font.terminalfont,tft.rgbcolor(255,255,255), 1)
+        ay0=-10;ax=randint(1,11)*10;
     # restart game button   
         if key=="t" :
             tft.clear(tft.rgbcolor(0, 0, 0))

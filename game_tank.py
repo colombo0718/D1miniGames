@@ -1,6 +1,5 @@
-from machine import Pin, SPI, ADC
+from machine import Pin, SPI, ADC, PWM
 from tft import TFT_GREEN
-#import font
 import time
 from urandom import *
 
@@ -15,8 +14,10 @@ rst = Pin(0, Pin.OUT)
 # check your port docs to see which Pins you can use
 spi = SPI(1, baudrate=8000000, polarity=1, phase=0)
 # TFT object, this is ST7735R green tab version
-tft = TFT_GREEN(128, 160, spi, dc, cs, rst, rotate=0)
+tft = TFT_GREEN(128, 160, spi, dc, cs, rst, rotate=180)
 tft.init()
+
+# -----------------
 
 # low level random generator -------------- 
 def randrange(start, stop=None):
@@ -42,22 +43,18 @@ def randint(start, stop):
 adc = ADC(0)
 def getKey(adc):
     key='n'
-    if adc<30 :
+    if adc<80 :
         key='n'
     elif abs(adc-1024)<50:
         key='u'
-    elif abs(adc-941)<50:
+    elif abs(adc-964)<50:
         key='d'
-    elif abs(adc-786)<50:
+    elif abs(adc-730)<80:
         key='l'
-    elif abs(adc-631)<50:
+    elif abs(adc-489)<50:
         key='r'
-    elif abs(adc-478)<50:
-        key='m'
-    elif abs(adc-324)<50:
-        key='s'
-    elif abs(adc-170)<50:
-        key='t'     
+    elif abs(adc-246)<80:
+        key='m'    
     return key
 Vb=10
 # plot game object functions

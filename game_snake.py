@@ -1,6 +1,5 @@
-from machine import Pin, SPI, ADC
+from machine import Pin, SPI, ADC,PWM
 from tft import TFT_GREEN
-#import font
 import time
 from urandom import *
 
@@ -15,7 +14,7 @@ rst = Pin(0, Pin.OUT)
 # check your port docs to see which Pins you can use
 spi = SPI(1, baudrate=8000000, polarity=1, phase=0)
 # TFT object, this is ST7735R green tab version
-tft = TFT_GREEN(128, 160, spi, dc, cs, rst, rotate=0)
+tft = TFT_GREEN(128, 160, spi, dc, cs, rst, rotate=180)
 tft.init()
 
 # low level random generator -------------- 
@@ -44,20 +43,16 @@ def getKey(adc):
     key='n'
     if adc<80 :
         key='n'
-    elif abs(adc-1024)<80:
+    elif abs(adc-1024)<50:
         key='u'
-    elif abs(adc-941)<50:
+    elif abs(adc-964)<50:
         key='d'
-    elif abs(adc-786)<80:
+    elif abs(adc-730)<80:
         key='l'
-    elif abs(adc-631)<50:
+    elif abs(adc-489)<50:
         key='r'
-    elif abs(adc-478)<80:
-        key='m'
-    elif abs(adc-324)<80:
-        key='s'
-    elif abs(adc-170)<80:
-        key='t'     
+    elif abs(adc-246)<80:
+        key='m'    
     return key
 
 # plot game object functions
@@ -68,14 +63,14 @@ def plotSnake(s):
     for n in range(len(s)):
         plotTile(s[n][0],s[n][1],tft.rgbcolor(0,255,0))
     
-def plotYelloHeart(n):
-    h=150
-    tft.rect(113,0,15,160,tft.rgbcolor(0,0,0))
-    for i in range(n):
-        tft.rect(115,h,3,6,tft.rgbcolor(255,255,0))
-        tft.rect(118,h+2,2,6,tft.rgbcolor(255,255,0))
-        tft.rect(120,h,3,6,tft.rgbcolor(255,255,0))
-        h-=10
+#def plotYelloHeart(n):
+#    h=150
+#    tft.rect(113,0,15,160,tft.rgbcolor(0,0,0))
+#    for i in range(n):
+#        tft.rect(115,h,3,6,tft.rgbcolor(255,255,0))
+#        tft.rect(118,h+2,2,6,tft.rgbcolor(255,255,0))
+#        tft.rect(120,h,3,6,tft.rgbcolor(255,255,0))
+#        h-=10
 
 life=3
 
@@ -85,7 +80,7 @@ end=False
 
 tft.clear(tft.rgbcolor(0, 0, 0))
 tft.line(112, 0, 112, 160,tft.rgbcolor(255,255,255))
-plotYelloHeart(life)
+#plotYelloHeart(life)
 
 direction="d"
 snake=[[1,1],[1,2],[1,3],[1,4],[1,5]]
@@ -96,7 +91,9 @@ food = [10,10]
 plotTile(food[0],food[1],tft.rgbcolor(255,0,0))
     
 while True:
-    key=getKey(adc.read())
+    v=adc.read()
+    key=getKey(v)
+    print(key)
     # normal condition    
     if end == False:
         # press key change direction 
@@ -139,7 +136,7 @@ while True:
             snake=snake[1:]
         snake.append(head)
         plotTile(snake[-1][0],snake[-1][1],tft.rgbcolor(0,255,0))
-        print(len(snake))
+        #print(len(snake))
         
         # random set new food
         if head==food :
