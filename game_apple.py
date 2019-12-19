@@ -62,15 +62,15 @@ def getKey(adc):
     key='n'
     if adc<80 :
         key='n'
-    elif abs(adc-1024)<50:
+    elif abs(adc-922)<50:
         key='u'
-    elif abs(adc-964)<50:
+    elif abs(adc-740)<50:
         key='d'
-    elif abs(adc-730)<80:
+    elif abs(adc-555)<80:
         key='l'
-    elif abs(adc-489)<50:
+    elif abs(adc-370)<50:
         key='r'
-    elif abs(adc-246)<80:
+    elif abs(adc-188)<80:
         key='m'    
     return key
 
@@ -81,13 +81,21 @@ def plotGreenBasket(x0,x1):
     tft.rect(x1-8,150,3,5,tft.rgbcolor(0,255,0))
     tft.rect(x1+6,150,3,5,tft.rgbcolor(0,255,0))
   
-def plotRedApple(x,y,color):
-    tft.rect(x-4,y-8-6,8,12,tft.rgbcolor(0,0,0))
-    tft.rect(x-4,y-3,8,6,tft.rgbcolor(255,0,0))
-    tft.rect(x-3,y-4,6,8,tft.rgbcolor(255,0,0))
-    tft.rect(x,y-7,1,3,tft.rgbcolor(255,0,0))
-    tft.rect(x,y-8,4,1,tft.rgbcolor(255,0,0))
-    
+def plotRedApple(x,y0,y1):
+    tft.rect(x-4,y0-8,8,12,tft.rgbcolor(0,0,0))
+    tft.rect(x-4,y1-3,8,6,tft.rgbcolor(255,0,0))
+    tft.rect(x-3,y1-4,6,8,tft.rgbcolor(255,0,0))
+    tft.rect(x,y1-7,1,3,tft.rgbcolor(255,0,0))
+    tft.rect(x,y1-8,4,1,tft.rgbcolor(255,0,0))
+ 
+def plotYelloHeart(n):
+    h=150
+    tft.rect(113,0,15,160,tft.rgbcolor(0,0,0))
+    for _ in range(n):
+        tft.rect(115,h,3,6,tft.rgbcolor(255,255,0))
+        tft.rect(118,h+2,2,6,tft.rgbcolor(255,255,0))
+        tft.rect(120,h,3,6,tft.rgbcolor(255,255,0))
+        h-=10 
 
 # game parameter initialize
 end=False;score=0
@@ -99,6 +107,9 @@ bx0=50;bx1=50;by=140
 
 tft.clear(tft.rgbcolor(0, 0, 0))
 plotGreenBasket(bx0,bx1)
+tft.line(112, 0, 112, 160,tft.rgbcolor(255,255,255))
+life=0
+plotYelloHeart(life)
 
 while True:
     key=getKey(adc.read())
@@ -106,29 +117,35 @@ while True:
     if end == False:
         # get control 
         if key=="l" and bx1>10  :bx1=bx0-5;toot()
-        if key=="r" and bx1<120 :bx1=bx0+5;toot()
+        if key=="r" and bx1<100 :bx1=bx0+5;toot()
         # plotBasket
         if bx1!=bx0:
             #plotGreenBasket(bx0,140,tft.rgbcolor(0,0,0))
             plotGreenBasket(bx0,bx1)
             bx0=bx1
         # plotApple
-        ay1=ay0+3
-        plotRedApple(ax,ay0,tft.rgbcolor(0,0,0))
-        plotRedApple(ax,ay1,tft.rgbcolor(255,0,0))
+        ay1=ay0+3+life
+        plotRedApple(ax,ay0,ay1)
         ay0=ay1
-        if ay1>165: ay0=-10;ax=randint(1,11)*10;
+        if ay1>170:
+            ay0=-20;
+            ax=randint(10,100);
+            print(ax)
         #print(ax,ay1,bx1,by)
-    # collision happened
-    
-    if ay1>150 and ax-bx1<20 and ax-bx1>-5 :
+        
+    # collision happened   
+    if ay1>150 and ax-bx1<10 and ax-bx1>-10 :
         ding()
         ding()
         score+=1
-        ay0=-10;ax=randint(1,11)*10;
+        ay0=-10;ax=randint(10,100);
+        plotGreenBasket(bx0,bx1)
+        if life<10 :life+=1
+        plotYelloHeart(life)
+        
     # restart game button   
         if key=="t" :
-            tft.clear(tft.rgbcolor(0, 0, 0))
+            tft.clear(tft.rgbcolor(0, 0, 0));
             by=-20;
             bx=randint(0,11)*10;
             end=False;

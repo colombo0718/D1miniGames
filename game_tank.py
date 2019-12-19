@@ -45,17 +45,18 @@ def getKey(adc):
     key='n'
     if adc<80 :
         key='n'
-    elif abs(adc-1024)<50:
+    elif abs(adc-922)<50:
         key='u'
-    elif abs(adc-964)<50:
+    elif abs(adc-740)<50:
         key='d'
-    elif abs(adc-730)<80:
+    elif abs(adc-555)<80:
         key='l'
-    elif abs(adc-489)<50:
+    elif abs(adc-370)<50:
         key='r'
-    elif abs(adc-246)<80:
+    elif abs(adc-188)<80:
         key='m'    
     return key
+
 Vb=10
 # plot game object functions
 def plotBluTank(x0,x1,y):
