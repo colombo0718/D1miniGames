@@ -17,6 +17,7 @@ spi = SPI(1, baudrate=8000000, polarity=1, phase=0)
 tft = TFT_GREEN(128, 160, spi, dc, cs, rst, rotate=180)
 tft.init()
 
+
 # low level random generator -------------- 
 def randrange(start, stop=None):
     if stop is None:
@@ -43,15 +44,15 @@ def getKey(adc):
     key='n'
     if adc<80 :
         key='n'
-    elif abs(adc-1024)<50:
+    elif abs(adc-922)<50:
         key='u'
-    elif abs(adc-964)<50:
+    elif abs(adc-740)<50:
         key='d'
-    elif abs(adc-730)<80:
+    elif abs(adc-555)<80:
         key='l'
-    elif abs(adc-489)<50:
+    elif abs(adc-370)<50:
         key='r'
-    elif abs(adc-246)<80:
+    elif abs(adc-188)<80:
         key='m'    
     return key
 

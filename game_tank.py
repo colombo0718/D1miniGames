@@ -18,6 +18,12 @@ tft = TFT_GREEN(128, 160, spi, dc, cs, rst, rotate=180)
 tft.init()
 
 # -----------------
+buzzer=PWM(Pin(12,Pin.OUT),duty=500)
+def toot():
+    buzzer.duty(500)
+    buzzer.freq(1000)
+    time.sleep(.01)
+    buzzer.duty(0)
 
 # low level random generator -------------- 
 def randrange(start, stop=None):

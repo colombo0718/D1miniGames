@@ -33,6 +33,12 @@ def ding():
     buzzer.freq(500)
     time.sleep(.03)
     buzzer.duty(0)
+    
+def buzz():
+    buzzer.duty(500)
+    buzzer.freq(200)
+    time.sleep(.5)
+    buzzer.duty(0)
 
 toot()
 
@@ -62,15 +68,15 @@ def getKey(adc):
     key='n'
     if adc<80 :
         key='n'
-    elif abs(adc-1024)<50:
+    elif abs(adc-922)<50:
         key='u'
-    elif abs(adc-964)<50:
+    elif abs(adc-740)<50:
         key='d'
-    elif abs(adc-730)<80:
+    elif abs(adc-555)<80:
         key='l'
-    elif abs(adc-489)<50:
+    elif abs(adc-370)<50:
         key='r'
-    elif abs(adc-246)<80:
+    elif abs(adc-188)<80:
         key='m'    
     return key
 
@@ -81,37 +87,64 @@ def plotRedCar(x0,x1):
     tft.rect(x1,140,10,20,tft.rgbcolor(255,0,0))
 
 
-def plotBlueCar(x,y):
-    tft.rect(x,y-3,10,5,tft.rgbcolor(0,0,0))
-    tft.rect(x,y,10,20,tft.rgbcolor(0,0,255))
+def plotBlueCar(x,y0,y1):
+    tft.rect(x,y0,10,20,tft.rgbcolor(0,0,0))
+    tft.rect(x,y1,10,20,tft.rgbcolor(0,0,255))
+
+def plotYelloHeart(n):
+    h=150
+    tft.rect(113,0,15,160,tft.rgbcolor(0,0,0))
+    for _ in range(n):
+        tft.rect(115,h,3,6,tft.rgbcolor(255,255,0))
+        tft.rect(118,h+2,2,6,tft.rgbcolor(255,255,0))
+        tft.rect(120,h,3,6,tft.rgbcolor(255,255,0))
+        h-=10 
 
 # game parameter initialize
 end=False
 x0=50;x1=50
-bx=10;by=0
+bx=10;by0=0;by1=0
 
 tft.clear(tft.rgbcolor(0, 0, 0))
+#tft.line(112, 0, 112, 160,tft.rgbcolor(255,255,255))
+life=0
+#plotYelloHeart(life)
 while True:
     key=getKey(adc.read())
     # normal condition    
     if end == False:
         if key=="l" and x1>0  :x1-=5;toot()
         elif key=="r" and x1<120 :x1+=5;toot()
-        plotRedCar(x0,x1)
-        
+        plotRedCar(x0,x1)   
         x0=x1
-        if by>165 :by=-20;bx=randint(0,11)*10;
         #print(bx,by)
-        plotBlueCar(bx,by)
-        by+=3
-    # collision happened
-    if x1==bx and abs(by-140)<20 :
-        end=True
-    # restart game button   
-        if key=="m" :
-            tft.clear(tft.rgbcolor(0, 0, 0))
-            by=-20;
+        by1=by0+3+life
+        plotBlueCar(bx,by0,by1)
+        by0=by1
+        
+        # pass one car 
+        if by1>180 :
+            life+=1
+            #plotYelloHeart(life)
+            by0=-20;
             bx=randint(0,11)*10;
+        
+    
+
+    
+    # collision happened
+    if abs(x1-bx)<10 and abs(by1-140)<20:
+        end=True
+        buzz()
+
+        
+        
+    # restart game button   
+        if key=="m":
+            tft.clear(tft.rgbcolor(0, 0, 0))
+            by0=-20;
+            bx=randint(0,11)*10;
+            life=0
             end=False;
     # necessary time delay    
     time.sleep(.03)

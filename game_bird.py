@@ -1,6 +1,5 @@
-from machine import Pin, SPI, ADC
+from machine import Pin, SPI, ADC, PWM
 from tft import TFT_GREEN
-import font
 import time
 from urandom import *
 
@@ -15,8 +14,23 @@ rst = Pin(0, Pin.OUT)
 # check your port docs to see which Pins you can use
 spi = SPI(1, baudrate=8000000, polarity=1, phase=0)
 # TFT object, this is ST7735R green tab version
-tft = TFT_GREEN(128, 160, spi, dc, cs, rst, rotate=0)
+tft = TFT_GREEN(128, 160, spi, dc, cs, rst, rotate=180)
 tft.init()
+#------------------
+buzzer=PWM(Pin(12,Pin.OUT),duty=500)
+def toot():
+    buzzer.duty(500)
+    buzzer.freq(1000)
+    time.sleep(.01)
+    buzzer.duty(0)
+    
+def buzz():
+    buzzer.duty(500)
+    buzzer.freq(200)
+    time.sleep(1)
+    buzzer.duty(0)
+    
+toot()
 
 # low level random generator -------------- 
 def randrange(start, stop=None):
@@ -42,22 +56,18 @@ def randint(start, stop):
 adc = ADC(0)
 def getKey(adc):
     key='n'
-    if adc<30 :
+    if adc<80 :
         key='n'
-    elif abs(adc-1024)<5:
+    elif abs(adc-922)<50:
         key='u'
-    elif abs(adc-941)<5:
+    elif abs(adc-740)<50:
         key='d'
-    elif abs(adc-786)<5:
+    elif abs(adc-555)<80:
         key='l'
-    elif abs(adc-631)<5:
+    elif abs(adc-370)<50:
         key='r'
-    elif abs(adc-478)<5:
-        key='m'
-    elif abs(adc-324)<5:
-        key='s'
-    elif abs(adc-170)<5:
-        key='t'     
+    elif abs(adc-188)<80:
+        key='m'    
     return key
 
 def plotRedBird(x0,x1):
@@ -79,33 +89,31 @@ while True:
     key=getKey(adc.read())
     
     if not end:
-        x1+=5
+        x1+=2
         if key=="m":# and x1>0 and x1<120 :
-            x1-=10
-        print(key)
+            toot()
+            x1-=6
         plotRedBird(x0,x1)
         x0=x1
         
         plotBluePiller(bx,by)
-        by+=5
+        by+=4
         if by>165:
             bx=randint(0,128-40)
             by=0
     
-    if by==125 or by==130 :
+    if by>120 and by<130 :
         if x1<bx or x1>bx+30:
-            tft.text(0,10,"Good Game", font.terminalfont,tft.rgbcolor(0,255,0), 2)
-            tft.text(0,30,"please press 'RST' ", font.terminalfont,tft.rgbcolor(0,255,0), 1)
-            tft.text(0,40,"to restart game.", font.terminalfont,tft.rgbcolor(0,255,0), 1)
+            buzz()
             end=True 
-            if key=="t":
-                tft.clear(tft.rgbcolor(0, 0, 0))
+            if key=="l":
+                tft.clear(tft.rgbcolor(0,0,0))
                 bx=randint(0,128-40)
                 x1=50
                 by=0;
                 end=False
     
     
-    time.sleep(.1)
+    time.sleep(.01)
     
 
