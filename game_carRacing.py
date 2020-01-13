@@ -92,25 +92,48 @@ redCar.y=140
 x0=0;x1=0
 y0=0;y1=0
 
-life=0
+score=5
+lcd.text(10, 5, "score:")
+lcd.text(74, 5,score)
 
 while True:
-    # red car control 
     key=getKey(adc.read())
-    if key=='r':
-        x1=x0+2
-    if key=='l':
-        x1=x0-2
-    redCar.xplot(x0,x1)
-    x0=x1
-    
-    # blue car moving 
-    y1=y0+3
-    bluCar.yplot(y0,y1)
-    y0=y1
-    if y0>170 :
-        y0=-20
-        bluCar.x=randint(0,110)
+    if not end :
+        # red car control 
+        if key=='r':
+            x1=x0+2
+        if key=='l':
+            x1=x0-2
+        redCar.xplot(x0,x1)
+        x0=x1
+        
+        # blue car moving 
+        y1=y0+3+score//2
+        bluCar.yplot(y0,y1)
+        y0=y1
+        if y0>170 :
+            score+=1
+            lcd.text(10, 5, "score:")
+            lcd.text(74, 5,score)
+            y0=-20
+            bluCar.x=randint(0,110)
+            
+        if 20<bluCar.y<40:
+            lcd.text(10, 5, "score:")
+            lcd.text(74, 5,score)
 
-    
-
+        # collision happe
+        if abs(redCar.y-bluCar.y)<17 :
+            if abs(redCar.x-bluCar.x)<13 :
+                buzz()
+                end=True
+                
+    if end :
+        if key=="m":
+            end=False
+            y0=-20
+            bluCar.hide()
+            bluCar.x=randint(0,110)
+            score=0
+            lcd.text(10, 5, "score:")
+            lcd.text(74, 5,score)
