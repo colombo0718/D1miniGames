@@ -85,20 +85,32 @@ toot()
 end=False
 redCar = Character(
     (car_pixels_1,car_pixels_2), 13, 17, lcd, LCD.RED)
+bluCar = Character(
+    (car_pixels_1,car_pixels_2), 13, 17, lcd, LCD.BLUE)
 redCar.x=0
 redCar.y=140
 x0=0;x1=0
+y0=0;y1=0
+
 life=0
 
 while True:
-    redCar.xplot(x0,x1)
+    # red car control 
     key=getKey(adc.read())
     if key=='r':
-        x1=x0+1
+        x1=x0+2
     if key=='l':
-        x1=x0-1
-    print(key)
+        x1=x0-2
+    redCar.xplot(x0,x1)
+    x0=x1
     
+    # blue car moving 
+    y1=y0+3
+    bluCar.yplot(y0,y1)
+    y0=y1
+    if y0>170 :
+        y0=-20
+        bluCar.x=randint(0,110)
 
     
 

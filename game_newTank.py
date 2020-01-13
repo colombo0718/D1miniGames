@@ -152,7 +152,7 @@ py0=-20;py1=0
 cy0=180;cy1=0
 
 
-score=0
+score=5
 lcd.text(10, 5, "score:")
 lcd.text(74, 5,score)
 
@@ -202,13 +202,13 @@ while True:
         
         # collision happen
         print(abs(cyaFire.x-redTank.x)<6 ,cyaFire.y)
-        if abs(cyaFire.x-redTank.x)<6 and 140<cyaFire.y<164:
+        if abs(cyaFire.x-redTank.x)<7 and 140<cyaFire.y<164:
             cy0=170
             score-=1
             buzz()
             lcd.text(10, 5, "score:")
             lcd.text(74, 5,score)
-        if abs(purFire.x-bluTank.x)<6 and 16<purFire.y<37:
+        if abs(purFire.x-bluTank.x)<7 and 16<purFire.y<37:
             py0=-10
             score+=1
             buzz()
