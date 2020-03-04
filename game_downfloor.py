@@ -247,9 +247,9 @@ while True:
             man=left
             if x0>2:
                 x1=x0-4
-        if key=="d":
-            y1=y0+4
-            man=fall
+#         if key=="d":
+#             y1=y0+4
+#             man=fall
         if key=="n":
             man=stop
             if state != "up" :

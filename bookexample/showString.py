@@ -1,0 +1,19 @@
+import LCD
+from machine import freq,SPI,Pin,PWM,ADC,Timer
+import time
+from flaglib import *
+
+# 螢幕初始設定
+spi = SPI(1, baudrate=40000000, polarity=0, phase=0)
+screen = LCD.LCD(spi, 15, 5, 0)
+screen.init()
+screen.clearLCD()
+
+# 文字顏色調整
+screen.text(10, 10, "Hello World")
+screen.text(10, 30, "Hello World", LCD.YELLOW)
+screen.text(10, 50, "Hello World", LCD.RED, LCD.GRAY)
+screen.text(10, 70, "Hello World", screen.rgbcolor(0,255,0), screen.rgbcolor(255,0,255))
+
+
+
