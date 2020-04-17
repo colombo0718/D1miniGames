@@ -1,23 +1,24 @@
+from machine import ADC,SPI,PWM,Pin
+from FlagArcade import *
 import LCD
-from machine import freq,SPI,Pin,PWM,ADC,Timer
-import time
-from flaglib import *
-
-
-# 按鈕與蜂鳴器感測腳位設定
-adc = ADC(0)
-buzzer = PWM(Pin(12))
-buzzer.freq(1000)
 
 # 螢幕初始設定
-spi = SPI(1, baudrate=40000000, polarity=0, phase=0)
+spi = SPI(1, baudrate=40000000)
 screen = LCD.LCD(spi, 15, 5, 0)
 screen.init()
 screen.clearLCD()
 
+# 按鈕腳位設定
+adc = ADC(0)
+
+# 蜂鳴器腳位與強度設定
+buzzer = PWM(Pin(2))
+amp = 512
+
 # 搖桿音效設計
-def bee():
-    buzzer.duty(500)
+def toot():
+    buzzer.freq(494)
+    buzzer.duty(amp)
     time.sleep(.05)
     buzzer.duty(0)
 
@@ -64,15 +65,20 @@ b"1111111111111"
 car= Character([c1,c2], 13, 17, screen, LCD.RED)
 car.show(60,140)
 
+
     
 while True:
     key=getKey(adc.read())
-    print(key)
-    if key== "r":
+    if key == "r":
         car.move(3,0)
-        bee()
-    elif key== "l":
+        toot()
+    elif key == "l":
         car.move(-3,0)
-        bee()
+        toot()
+    elif key == "set":
+        if amp == 512 :
+            amp = 0
+        else :
+            amp = 512
     else :
         car.plot()

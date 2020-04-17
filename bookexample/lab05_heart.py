@@ -1,7 +1,7 @@
 from machine import freq,SPI,Pin,PWM,ADC,Timer
 import time
 import LCD
-from flaglib import *
+from FlagArcade import *
 
 # 螢幕初始設定
 spi = SPI(1, baudrate=40000000, polarity=0, phase=0)

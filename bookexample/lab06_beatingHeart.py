@@ -1,5 +1,4 @@
-from machine import freq,SPI,Pin,PWM,ADC,Timer
-import time
+from machine import SPI,ADC
 import LCD
 from FlagArcade import *
 
