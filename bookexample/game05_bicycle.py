@@ -1,57 +1,41 @@
+from machine import ADC,SPI,PWM,Pin,freq
+from FlagArcade import *
 import LCD
-from machine import freq,SPI,Pin,PWM,ADC,Timer
-import time
-from flaglib import *
 
-freq(160000000)
+# 螢幕初始設定
+spi = SPI(1, baudrate=40000000)
+screen = LCD.LCD(spi, 15, 5, 0)
+screen.init()
+screen.clearLCD()
 
-spi = SPI(1, baudrate=40000000, polarity=0, phase=0)
-lcd = LCD.LCD(spi, 15, 5, 0)
-lcd.init()
-lcd.setRotation(4)
-lcd.clearLCD()
-
+# 按鈕腳位設定
 adc = ADC(0)
-button = Pin(4, Pin.IN, Pin.PULL_UP)
-buzzer = PWM(Pin(12))
 
-bicycle_pixels_1=(
-b"                    "    
-b"                    "
-b"         111        "    
-b"         111        "    
-b"         111        "    
-b"         1          "
-b"        111   1     "
-b"       11  111      "
-b"      11    1 1     "
-b"    11111      1    "
-b" 111    11    11111 "
-b"1 1 1  11    1 1 1 1"
-b"11111 1111111  11111"
-b"1 1 1          1 1 1"
-b" 111            111 "
-)
+# 蜂鳴器腳位與強度設定
+buzzer = PWM(Pin(4))
+amp = 512
 
-bicycle_pixels_2=(
-b"                    "    
-b"                    "    
-b"          111       "
-b"          111       "    
-b"          111       "    
-b"         1          "
-b"        111   1     "
-b"       11  111      "
-b"      11    1 1     "
-b"    1111111    11   "
-b" 111   1  1   11111 "
-b"11 11   1 11 1 11 11"
-b"1 1 1 1111111  1 1 1"
-b"11 11 11       11 11"
-b" 111            111 "
-)
-#----------------
-bicycle_pixels_1=(
+# 設計遊戲音效
+def ding():
+    buzzer.freq(988)
+    buzzer.duty(amp)
+    time.sleep(.05)
+    buzzer.duty(0)
+
+def toot():
+    buzzer.freq(494)
+    buzzer.duty(amp)
+    time.sleep(.01)
+    buzzer.duty(0)
+    
+def buzz():
+    buzzer.freq(247)
+    buzzer.duty(amp)
+    time.sleep(.5)
+    buzzer.duty(0)
+
+# 建立遊戲角色
+b1=(
 b"         111        "    
 b"         111        "    
 b"         111        "    
@@ -69,7 +53,7 @@ b" 1 1 1        1 1 1 "
 b"  111          111  "
 )
 
-bicycle_pixels_2=(
+b2=(
 b"          111       "    
 b"          111       "    
 b"          111       "    
@@ -87,7 +71,7 @@ b" 1   1        1   1 "
 b"  111          111  "
 )
 
-hydrant_pixels=(
+hy=(
 b"    1111    "
 b"   111111   "
 b"    1111    "
@@ -100,95 +84,116 @@ b"    1111    "
 b"    1111    "
 )
 
-def toot():
-    buzzer.duty(500)
-    buzzer.freq(1000)
-    ### 背景音樂播放時的音效不要 sleep 也不要 duty(0) ###
-    time.sleep(.05)
-    buzzer.duty(0)
-def buzz():
-    buzzer.duty(500)
-    buzzer.freq(200)
-    time.sleep(.1)
-    buzzer.duty(0)
-toot()
+r1=(
+b"     111     "
+b"    1111     "
+b"     111     "
+b"      1      "
+b"    11111    "
+b" 1 1 111 1   "
+b"  1  111  1  "
+b"     111 1   "
+b"    1  1     "
+b"   1    1    "
+b"   1     11  "
+b"   1         "
+)
+r2=(
+b"             "
+b"     111     "
+b"    1111     "
+b"     111     "
+b"     111     "
+b"     1111    "
+b"   11111     "
+b"     111     "
+b"     1 1     "
+b"    1 1      "
+b"    1 1      "
+b"     1 1     "
+)
 
-# 初始化變數
+hydrant = Character(hy, 12, 10, screen , LCD.RED)
+bicycle = Character([b1,b2], 20, 15, screen,LCD.YELLOW)
+running = Character([r1,r2], 13, 12, screen,LCD.BLUE)
+obstacle = hydrant
+
+# 宣告全域變數
 end = False
-jump = False   
-x0 = 145; x1 = x0
-y0 = 145; y1 = y0
-v = 0
-running_time = 0
-running_dist = 0
 score=0
+jump = False
+vx=10;vy=0
 
-hydrant = Character(hydrant_pixels, 12, 10, lcd, LCD.RED)
-# 用兩個 bitmap 來建立 bicycle 物件. 預設會自動換圖產生動作效果
-bicycle = Character(
-    (bicycle_pixels_1,bicycle_pixels_2), 20, 15, lcd, lcd.rgbcolor(255,255,0))
+# 建立常用函式
+def resetGame():
+    global end,score,obstacle,vx
+    bicycle.show(10, 145)
+    hydrant.show(150, 148)
+    running.show(150, 148)
+    vx=10
+    obstacle = hydrant
+    screen.text(30,70, "Game Over",LCD.BLACK)
+    end=False
+    score=0
 
-bicycle.show(10, y0)
-hydrant.y = 150
+def printScore():
+    global score 
+    screen.text(10, 5,"score:"+str(score)+'   ')
+    
+resetGame()
+printScore()
 
-lcd.text(10, 10, "score:")
-lcd.text(74, 10,score)
 while True:
     key=getKey(adc.read())
     if not end:
-
-        # Cactus forward
-        if x0<-50:
-            x0=130
-            score+=1
-            lcd.text(74, 10,score)
-        # speed_level 越高, 仙人掌速度越快
-        x1 = x0-6-score//5
-        
-        # dinosaur jumping
-        if jump:
-            y1=y0+v 
-            v+=1
-            
-        # fall on ground    
-        if y1>145:
-            v=0
-            y1=145
-            jump=False
-            
-        # press to jump
+        # 腳踏車起跳
         if key=='m' and jump==False:
             jump=True
             toot()
-            if v==0:
-                v=-6
+            if vy==0:
+                vy=-6
+            
+        # 跳躍過程中
+        if jump:
+            bicycle.move(0,vy)
+            vy+=1
+        else:
+            bicycle.plot()
+           
+        # 著地瞬間
+        if bicycle.y>145:
+            vy=0
+            bicycle.show(10,145)
+            jump=False    
 
-        bicycle.yplot(y0,y1)
-        hydrant.xplot(x0,x1)
-        x0=x1
-        y0=y1
+        # 障礙物相對向後
+        obstacle.move(-vx)
         
-    # collision happened
-    if not end and 0<x1<30:
-        if y1>137:
-            end=True
+        # 越過障礙物得分
+        if obstacle.x<-20:
+            ding()
+            score+=1
+            # 更換障礙物
+            if score>10:
+                obstacle=running
+                vx=13
+            obstacle.show(150,148)
+            printScore()       
+           
+        # 發生車禍，遊戲結束
+        if bicycle.touch(obstacle):
             buzz()
-            lcd.text(30, 60, "GAME OVER", color=LCD.YELLOW)
-    
-    # restart game button
-    if end and key=='m':
-        lcd.clearLCD()
-        score=0
-        lcd.text(10, 10, "score: ")
-        lcd.text(74, 10,score)
-        # initialize
-        end = False
-        jump = False   
-        x0 = 140; x1 = x0
-        y0 = 147; y1 = y0
-        v = 0
-        running_time = 0
-        running_dist = 0          
-
-    
-    running_time += 1
+            screen.text(30,70, "Game Over",LCD.YELLOW)
+            end=True
+        
+    # 遊戲重啟
+    if end :
+        if key=="rst":
+            resetGame()
+            printScore()
+    # 切換靜音
+    if key=="set" :
+        if amp == 512 :
+            amp = 0
+        else :
+            amp = 512         

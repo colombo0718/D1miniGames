@@ -1,22 +1,41 @@
+from machine import ADC,SPI,PWM,Pin,freq
+from FlagArcade import *
 import LCD
-from machine import freq,SPI,Pin,PWM,ADC,Timer
-import time
-from flaglib import *
 
-freq(160000000)
+# 螢幕初始設定
+spi = SPI(1, baudrate=40000000)
+screen = LCD.LCD(spi, 15, 5, 0)
+screen.init()
+screen.clearLCD()
 
-spi = SPI(1, baudrate=40000000, polarity=0, phase=0)
-lcd = LCD.LCD(spi, 15, 5, 0)
-lcd.init()
-lcd.setRotation(4)
-lcd.clearLCD()
-
+# 按鈕腳位設定
 adc = ADC(0)
-button = Pin(4, Pin.IN, Pin.PULL_UP)
-buzzer = PWM(Pin(12))
 
+# 蜂鳴器腳位與強度設定
+buzzer = PWM(Pin(4))
+amp = 512
 
-bicycle_pixels_1=(
+# 設計遊戲音效
+def ding():
+    buzzer.freq(988)
+    buzzer.duty(amp)
+    time.sleep(.05)
+    buzzer.duty(0)
+
+def toot():
+    buzzer.freq(494)
+    buzzer.duty(amp)
+    time.sleep(.01)
+    buzzer.duty(0)
+    
+def buzz():
+    buzzer.freq(247)
+    buzzer.duty(amp)
+    time.sleep(.5)
+    buzzer.duty(0)
+
+# 建立遊戲角色
+h1=(
 b"        1   1111    "    
 b"       1    1       "    
 b"      1111111111111 "    
@@ -34,7 +53,7 @@ b"          1    1  1 "
 b"        1111111111  "
 )
 
-bicycle_pixels_2=(
+h2=(
 b"        1111   11   "    
 b"         11   11 1  "    
 b"      1    111    1 "    
@@ -52,7 +71,7 @@ b"          1    1  1 "
 b"        1111111111  "
 )
 
-hydrant_pixels_1=(
+u1=(
 b"                 "
 b"         1       "
 b"         1       "
@@ -67,7 +86,7 @@ b"    111 1 1 111  "
 b"     1   1   1   "
 )
 
-hydrant_pixels_2=(
+u2=(
 b"         1       "
 b"        1 1      "
 b"         1       "
@@ -82,131 +101,100 @@ b"    1 1 111 1 1  "
 b"     1   1   1   "
 )
 
-fire_pixels=(
+bbb=(
 b"11   11   11 "
 b" 11   11   11"
 b"11   11   11 "
 )
 
-def toot():
-    buzzer.duty(500)
-    buzzer.freq(1000)
-    ### 背景音樂播放時的音效不要 sleep 也不要 duty(0) ###
-    time.sleep(.05)
-    buzzer.duty(0)
-def ding():
-    buzzer.duty(500)
-    buzzer.freq(1000)
-    time.sleep(.02)
-    buzzer.freq(500)
-    time.sleep(.05)
-    buzzer.freq(1000)
-    time.sleep(.03)
-    buzzer.duty(0)
-def buzz():
-    buzzer.duty(500)
-    buzzer.freq(200)
-    time.sleep(.1)
-    buzzer.duty(0)
-toot()
+helicopter = Character([h1,h2], 20, 15, screen, LCD.BLUE)
+ufo = Character([u1,u2], 17, 11, screen, LCD.YELLOW)
+bullet = Character(bbb,13,3, screen, LCD.RED)
+bullet.x=150
 
-# 初始化變數
+# 宣告全域變數
 end = False
-jump = False   
-x0 = 145; x1 = x0
-y0 = 145; y1 = y0
-fx0=0;fx1=0
-v = 0
-running_time = 0
-running_dist = 0
 score=0
 
-hydrant = Character((hydrant_pixels_1,hydrant_pixels_2), 17, 11, lcd, LCD.BLUE)
-# 用兩個 bitmap 來建立 bicycle 物件. 預設會自動換圖產生動作效果
-bicycle = Character(
-    (bicycle_pixels_1,bicycle_pixels_2), 20, 15, lcd, lcd.rgbcolor(255,255,0))
+# 建立常用函式
+def resetGame():
+    global end,score
+    helicopter.show(0,100)
+    ufo.show(140,randint(30,150))
+    bullet.show(140,0)
+    screen.text(30,70, "Game Over",LCD.BLACK)
+    end=False
+    score=0
 
-fire = Character(fire_pixels,13,3, lcd, LCD.RED)
-fire.x=130
-
-bicycle.show(0, y0)
-hydrant.y = 140
-
-lcd.text(10, 10, "score:")
-lcd.text(74, 10,score)
+def printScore():
+    global score 
+    screen.text(10, 5,"score:"+str(score)+'   ')
+    
+resetGame()
+printScore()
+    
 while True:
     key=getKey(adc.read())
     if not end:
-
-        # Cactus forward
-        if x0<-20:
-            x0=130
-            hydrant.y = randint(30,150)
-            score-=1
-            lcd.text(74, 10,score)
-        # speed_level 越高, 仙人掌速度越快
-        x1 = x0-2
-        
-        # dinosaur jumping
-        y1=y0+2
-            
-        # fall on ground    
-        if y1>145:
-            v=0
-            y1=145
-            
-            
-        # press to jump
-        if key=='u' :
-            y1=y0-3
+        # 控制直升機
+        if key=='u' and helicopter.y>20:
+            helicopter.move(0,-3)
             toot()
-        if key=='d' :
-            y1=y0+5
+        elif key=='d' and helicopter.y<150:
+            helicopter.move(0,5)
             toot()
-        if key=='m' and fire.x>140:
+        else:
+            helicopter.plot()
+            
+        # 發射子彈
+        if key=='m' and bullet.x>=130:
             ding()
-            fire.x=bicycle.x+10
-            fire.y=bicycle.y+10
-        # fire shoot
+            bullet.show(helicopter.x+10,helicopter.y+10)
+        if bullet.x<130 :
+            bullet.move(10,0)
 
-
-        bicycle.yplot(y0,y1)
-        hydrant.xplot(x0,x1)
-        fire.xplot(fire.x,fire.x+10)
-        x0=x1
-        y0=y1
+        # 幽浮逼近
+        ufo.move(-2,randint(-1-score,1+score))
+        if ufo.y>140 : ufo.y=140
+        if ufo.y< 30 : ufo.y=30
         
-        # ufo hited
-        if hydrant.x-10<fire.x<hydrant.x+17 :
-            if hydrant.y<fire.y<hydrant.y+10 :
-                buzz()
-                hydrant.hide()
-                x0=130
-                hydrant.y = randint(30,150)
-                fire.hide()
-                fire.x=140
-                score+=1
-                lcd.text(74, 10,score)
-          
-        if bicycle.x-17<hydrant.x<bicycle.x+20 : 
-            if bicycle.y-10<hydrant.y<bicycle.y+15 :
-                buzz()
-                end=True
-    
-    # restart game button
-    if end and key=='m':
-        lcd.clearLCD()
-        score=0
-        lcd.text(10, 10, "score: ")
-        lcd.text(74, 10,score)
-        # initialize
-        end = False
-        jump = False   
-        x0 = 140; x1 = x0
-        y0 = 147; y1 = y0
-        v = 0
-        running_time = 0
-        running_dist = 0          
+        # 漏打幽浮扣分
+        if ufo.x<-20:
+            buzz()
+            score-=1
+            printScore()
+#             ufo.hide()
+            ufo.show(130,randint(30,150))
+            
+        # 擊中幽浮得分
+        if ufo.touch(bullet) :
+            ding()
+            score+=1
+            printScore()
+#             ufo.hide()
+            ufo.show(130,randint(30,150))
+            bullet.show(140,100)
+            
+        # 碰撞墜毀，遊戲結束
+        if helicopter.touch(ufo) :
+            buzz()
+            screen.text(30,70, "Game Over",LCD.YELLOW)
+            end=True
+        if score<0:
+            screen.text(30,70, "Game Over",LCD.YELLOW)
+            end=True
+            
+    # 遊戲重啟
+    if end :
+        if key=="rst":
+            resetGame()
+            printScore()
+    # 切換靜音
+    if key=="set" :
+        if amp == 512 :
+            amp = 0
+        else :
+            amp = 512           
+        
 
-    
-    running_time += 1
+
